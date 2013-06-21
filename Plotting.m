@@ -651,8 +651,8 @@ Module[
 		DataReversed->{True,False},
 		AspectRatio->1,
 		FrameLabel->{Style["Synaptic Connections",FontFamily->"Helvetica",FontSize->fs,FontWeight->Bold],Style["p(MF)",FontFamily->"Helvetica",FontSize->fs,FontWeight->Bold]},
-		(*ColorFunction->(If[llfrac== 0,ft[#]&,If[#<0,Transparent,ftns[[odim]][Switch[emode,0,#,1,0]]]&]),*)
-		ColorFunction->(If[llfrac==0,ft[#]&,If[#<0,Transparent,ft[#]]&]),
+		ColorFunction->(If[llfrac== 0,ft[#]&,If[#<0,Transparent,ftns[[odim]][Switch[emode,0,#,1,0]]]&]),
+		(*ColorFunction->(If[llfrac==0,ft[#]&,If[#<0,Transparent,ft[#]]&]),*)
 		ColorFunctionScaling->False,
 		FrameTicks->tickformat,
 		Switch[frame,True,
@@ -1230,9 +1230,9 @@ Show[Graphics[T[[2]],
  	 AspectRatio -> 1, 
      FrameTicksStyle -> Directive[FontFamily -> "Helvetica", FontSize -> fs, FontWeight -> Bold], 
      FrameLabel -> {Style["Gain", FontFamily -> "Helvetica", FontSize -> fs, FontWeight -> Bold], 
-     Style["GC synapses", FontFamily -> "Helvetica", FontSize -> fs, FontWeight -> Bold]}]]
+     Style["Synaptic connections", FontFamily -> "Helvetica", FontSize -> fs, FontWeight -> Bold]}]]
 (**************************************************************************************)
-rangeencoded[encdata_] := Table[Table[Dimensions[Position[encdata[[tdex, All, 1]], d]][[1]], {d, maxd}], {tdex, Dimensions[encdata][[1]]}]         
+rangeencoded[encdata_] := Table[Table[Dimensions[Position[encdata[[tdex, All, 1]], d]][[1]], {d,Dimensions[encdata][[1]]}], {tdex, Dimensions[encdata][[1]]}]         
 (**************************************************************************************)
 rangesparseencoded[encdata_,maxd_:20] := Table[
 	                                 Table[

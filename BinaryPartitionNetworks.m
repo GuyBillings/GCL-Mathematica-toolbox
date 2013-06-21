@@ -57,13 +57,13 @@ network outputs"
 HdistNUM::usage="HdistNUM[\[Mu], d, \[Phi], \[Gamma], pon, pairs]: Numerical determination of (hout-hin)/\[Mu]*pon where hout and hin are the expected Hamming distances between\
 pairs of output and input binary vectors respectively." 
 
-GThreshold::usage="Threshold[pin_, d_, gain_, offset_: 0] Maps intervals of pin into threshold values.Offset=0: No tonic inhibition. >1, Floor[d/2] offset."
+GThreshold::usage="Threshold[pin_, d_, gain_, offset_: 0] Maps intervals of pin into threshold values. Offset=0: No tonic inhibition. >0, Floor[d/2] offset."
 
 Thrent::usage="Thrent[data_, pmin_, pinc_, pmax_, d_, gain_, offset_: 0] Entropy encoded when threshold increases with increasing pin."
 
 Thrprune::usage="Thrprune[data_,pmin_, pinc_, pmax_, dmax_, gain_] Produce portrait of encoded information given threshold function of specified gain."
 
-Thrpout::usage="Thrpout[pmin_, pinc_, pmax_, d_, gain_] Produce portrait of the output probability given threshold functions of specified gain."
+Thrpout::usage="Thrpout[pmin_, pinc_, pmax_, d_, gain_, offset_: 0] Produce portrait of the output probability given threshold functions of specified gain. Offset=0: No tonic inhibition. >0, Floor[d/2] offset."
 
 PDesc::usage="PDesc[f_, TB_] Returns the population acitivty (i.e. probability that a cell in active) implied by frequency 'f' in time bin of TB seconds assuming \
 Poisson spike train."
@@ -512,7 +512,7 @@ Thrprune[data_,pmin_, pinc_, pmax_, dmax_, gain_] :=
         {\[Phi], d}],
    {d, dmax}]}
 (**************************************************************************************)
-Thrpout[pmin_, pinc_, pmax_, d_, gain_] := Table[Pout[d, pin, GThreshold[pin, d, gain]], {pin, pmin, pmax, pinc}]                                         
+Thrpout[pmin_, pinc_, pmax_, d_, gain_, offset_: 0] := Table[Pout[d, pin, GThreshold[pin, d, gain, offset]], {pin, pmin, pmax, pinc}]                                         
 (**************************************************************************************)        
 Loaddump[file_]:=
                       Flatten[

@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Mathematica Package *)
 
 (* Created by the Wolfram Workbench Feb 14, 2012 *)
@@ -59,6 +61,8 @@ Covariance between granule cells as one travels radial across a volume of tissue
 meangloms::usage="meangloms[nets_, rdist_, slen_, clen_, Nfib_, Ngrc_, glox_, gloy_, gloz_, denlen_, d_, geom1_, geom2_, mode_, d\[Mu]_: 15, d\[Sigma]_: 5, repeat_, force_] Mean number of glomeruli in tissue volume"
 
 Amatrix::usage="Amatrix[conns_] Adjacency matrix formed from the connection list."
+
+AmatrixMfsGloms::usage="AmatrixMfsGloms[conns_, mflist_] Adjacency matrix for mf->grc and glom->grc connections, including isolated nodes."
 
 neighbourhood::usage="neighbourhood[A_] Computes the neighbourhood matrix of adjacency matrix A"
 
@@ -458,6 +462,29 @@ Amatrix[conns_] := Module[{connectedmfs, nmfs, ngrc, A, g, Aout},
                            {A, Aout}
                           ]
 (**************************************************************************************)                         
+AmatrixMfsGloms[conns_, mflist_] := Module[{gloms, mfs, \[Mu], ngls, \[Gamma], Amfs, g, Amfsfull, Agloms, Aglomsfull}, 
+                           \[Mu] = Dimensions[mflist][[1]];
+                           gloms = Flatten[Table[Table[{m, l}, {l, Dimensions[mflist[[m]]][[1]]}], {m, \[Mu]}], 1];
+                           mfs = Union[Flatten[gloms[[All, 1]]]]; 
+                           ngls = Dimensions[gloms][[1]]; 
+                           \[Gamma] = Dimensions[conns][[1]];
+                           Amfs = Table[Table[0, {mf, \[Mu]}], {g, \[Gamma]}];
+                           Agloms = Table[Table[0, {gl, ngls}], {g, \[Gamma]}];
+
+                           For[g = 1, g <= \[Gamma], g++,
+                               Table[Amfs[[g]][[Position[mfs, conns[[g]][[x]][[1]]][[1]][[1]]]] = 1, {x, Dimensions[conns[[g]]][[1]]}];
+                               Table[Agloms[[g]][[Position[gloms, conns[[g]][[x]]][[1]][[1]]]] = 1, {x, Dimensions[conns[[g]]][[1]]}]
+                              ]; 
+                           Amfsfull = Table[Table[If[x < \[Mu] && y > \[Mu] , Amfs[[y - \[Mu]]][[x]], If[x > \[Mu] && y < \[Mu], Amfs[[x - \[Mu]]][[y]], 0]], 
+                           	                  {x, \[Mu] + \[Gamma]}],
+                                             {y, \[Mu] + \[Gamma]}];
+
+                           Aglomsfull = Table[Table[If[x < ngls && y > ngls , Agloms[[y - ngls]][[x]], If[x > ngls && y < ngls, Agloms[[x - ngls]][[y]], 0]], 
+                           	                  {x, ngls + \[Gamma]}], 
+                           	            {y, ngls + \[Gamma]}];
+                           {Amfs, Amfsfull, Agloms, Aglomsfull}
+                          ]
+(**************************************************************************************)                         
 neighbourhood[A_] := Module[{Neighbours, connlist, Nout, Nconns, n, Ngrc = Dimensions[A[[1]]][[1]]}, 
 	                        connlist = Position[A[[1]], 1]; 
                             Nconns = Dimensions[connlist][[1]]; 
@@ -538,4 +565,7 @@ meanconpro[rdist_, bigdim_, cendim_, nmfs_, dlen_, d_, glox_, gloy_, gloz_, geom
 (**************************************************************************************)          
 End[]
 EndPackage[]
+
+
+
 

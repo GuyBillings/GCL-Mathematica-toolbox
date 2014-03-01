@@ -77,8 +77,8 @@ output : {{number mf}, {number mf connected}, {number grc reconnected to same mf
 {number of granule cells with fewer than target connections}, {number grcs connecting same glomeruli more than once},{distribution of unique connections per cell}}"
 
 meanconpro::usage="meanconpro[rdist_, bigdim_, cendim_, nmfs_, dlen_, d_, glox_, gloy_, gloz_, geom1_, geom2_, reps_, mode_, force_] \
-Function to determine the average number of cells that fail to make d unique connections and the average number of connections to unique mossy fibres per cell"                   
-                   
+Function to determine the average number of cells that fail to make d unique connections and the average number of connections to unique mossy fibres per cell"   
+         
 Begin["`Private`"]
 (* Implementation of the package *)
 (*INTERNAL FUNCTIONS*******************************************************************)
@@ -562,7 +562,7 @@ meanconpro[rdist_, bigdim_, cendim_, nmfs_, dlen_, d_, glox_, gloy_, gloz_, geom
                      ]; 
                   {gr/reps, uc/reps}
                  ]
-(**************************************************************************************)          
+
 End[]
 EndPackage[]
 

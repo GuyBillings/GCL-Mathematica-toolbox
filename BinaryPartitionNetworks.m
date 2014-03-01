@@ -71,6 +71,16 @@ Poisson spike train."
 FFromp::usage="FFromp[p_, TB_] Returns the firing rate (in Hz) implied by activity level 'p' assuming that cell is considered active if at least 1 spike occurs \
 in timebin of duration TB when firing with Poisson spike train."
 
+AddDomain::usage="AddDomain[pattern_, neighbours_, gpos_]: Adds a domain of nearest 'neighbours' active glomeruli based on distance information held in gpos."  
+
+GenCorrelatedPattern::usage="GenCorrelatedPattern[pon_, pattern_, neighbours_, gpos_]: Generates a single pattern having distance based correlated domains upto a \
+an overal level of 'pon' activation."
+
+GenCorPattEnsemble::usage="GenCorPattEnsemble[npatts_,pon_,neighbours_,gpos_]: Generates a spatially correlated binary pattern ensemble"
+
+FindentANACorr::usage="FindentANACorr[tc_, \[Mu]_, d_, \[Phi]_, \[Gamma]_, pon_, reps_, external_: 0, Ainit_: 0, domains_: 0]: As FindentNUM but applies anatomically
+correlated input patterns"
+
 (*COMPUTE FUNCTIONS********************************************************************)
 
 Parallelinit::usage = "Parallelinit[]: Distributes definitions in this package across available kernels such that Parallelsubmit[] can be used \
@@ -463,6 +473,14 @@ FindentNUM[tc_, \[Mu]_, d_, \[Phi]_, \[Gamma]_, pon_, reps_, external_: 0, Ainit
                                                                 ent = ent + N[Entropy[2, Boole[(Thread[#1 >= \[Phi]] &) /@ 
          Table[inputs[[x]].A, {x, 1, tc}]]]]];
   ent/reps]
+ (**************************************************************************************)      
+ FindentANACorr[tc_, \[Mu]_, d_, \[Phi]_, \[Gamma]_, pon_, reps_, A_, glompos_, domains_] := 
+  Module[{r, ent = 0, inputs}, 
+                                            For[r = 1, r <= reps, r++, 
+                                                                inputs = GenCorPattEnsemble[tc, pon, domains, glompos];
+                                                                ent = ent + N[Entropy[2, Boole[(Thread[#1 >= \[Phi]] &) /@ 
+         Table[inputs[[x]].A, {x, 1, tc}]]]]];
+  ent/reps]
  (**************************************************************************************)            
 EntvsgNUM[patts_, \[Mu]_Integer, d_Integer, \[Phi]_Integer, pon_, \[Gamma]max_Integer, \[Gamma]min_Integer, \[Gamma]inc_Integer,reps_Integer] := 
   Module[{}, 
@@ -536,7 +554,29 @@ FFromp[p_, TB_:(3*10^-2)] := -Log[1 - p]/TB
 (**************************************************************************************)
 Info[] := Print["BinaryPartitionNetworks is a Mathematica package for working with Binary Partition Networks. Guy \
 Billings UCL 2010. v0.5."]                                       
-(**************************************************************************************)
+(**************************************************************************************)     
+AddDomain[pattern_, neighbours_, gpos_] := 
+  Module[{seed, 
+  	      domain, 
+  	      dex, 
+          npattern = pattern, 
+          glist = Flatten[gpos,1]},
+          seed = RandomSample[glist, 1]; 
+          domain = Nearest[glist, seed[[1]], neighbours]; 
+          dex = Flatten[Position[glist, domain[[#]]] & /@ Range[neighbours]];
+          npattern[[dex]] = Table[1, {x, neighbours}]; 
+          npattern];
+(**************************************************************************************)       
+GenCorrelatedPattern[pon_, pattern_, neighbours_, gpos_] := 
+  Module[{pp = 0, 
+  	      npattern = pattern}, 
+          While[pp < pon, npattern = AddDomain[npattern, neighbours, gpos]; 
+                pp = Total[npattern]/Dimensions[npattern][[1]]]; 
+          npattern];
+(**************************************************************************************)  
+GenCorPattEnsemble[npatts_,pon_,neighbours_,gpos_]:=
+GenCorrelatedPattern[pon, #, neighbours, gpos]& /@ Table[Table[0, {x, 1, Dimensions[Flatten[gpos,1]][[1]]}], {y, 1,npatts}]
+(**************************************************************************************)  
 End[]
 Info[]
 EndPackage[]

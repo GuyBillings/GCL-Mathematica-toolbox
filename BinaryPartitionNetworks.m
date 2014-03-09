@@ -511,10 +511,10 @@ Loadfiles[maxd_, fileid_, path_, fpre_, fsuff_] :=
                                          For[d = 1, d <= maxd, d++, out[[f]][[d]] = ToExpression[StringSplit[import[[d]], "\t"]]]]]; 
                                          out]
 (**************************************************************************************)
-GThreshold[pin_, d_, gain_, offset_: 0] := 
+GThreshold[pin_, d_, gain_, offset_: 0, toniclevel_:0.5] := 
 Module[{intmems}, 
   		intmems = IntervalMemberQ[Table[Interval[{(x - 1)*1/(gain*d), If[x == d, 1, x*1/(gain*d)]}], {x, d}], pin]; 
-        Thread[If[Thread[# > d], d, #]] &@(Last[Position[intmems, True]][[1]] + If[offset>0,Floor[(d+1)/2],1]-1)];
+        Thread[If[Thread[# > d], d, #]] &@(Last[Position[intmems, True]][[1]] + If[offset>0,Floor[(d+1)*toniclevel],1]-1)];
 (**************************************************************************************)
 Thrent[data_, pmin_, pinc_, pmax_, d_, gain_, offset_: 0] := 
 Table[

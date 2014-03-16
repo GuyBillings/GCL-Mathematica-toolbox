@@ -57,13 +57,15 @@ network outputs"
 HdistNUM::usage="HdistNUM[\[Mu], d, \[Phi], \[Gamma], pon, pairs]: Numerical determination of (hout-hin)/\[Mu]*pon where hout and hin are the expected Hamming distances between\
 pairs of output and input binary vectors respectively." 
 
-GThreshold::usage="Threshold[pin_, d_, gain_, offset_: 0] Maps intervals of pin into threshold values. Offset=0: No tonic inhibition. >0, Floor[d/2] offset."
+GThreshold::usage="Threshold[pin_, d_, gain_, offset_: 0, level_: 0] Maps intervals of pin into threshold values. Offset=0: No tonic inhibition. >0, Floor[d*level] offset."
 
-Thrent::usage="Thrent[data_, pmin_, pinc_, pmax_, d_, gain_, offset_: 0] Entropy encoded when threshold increases with increasing pin."
+Thrent::usage="Thrent[data_, pmin_, pinc_, pmax_, d_, gain_, offset_: 0,  level_: 0]] Entropy encoded when threshold increases with increasing pin."
 
 Thrprune::usage="Thrprune[data_,pmin_, pinc_, pmax_, dmax_, gain_] Produce portrait of encoded information given threshold function of specified gain."
 
-Thrpout::usage="Thrpout[pmin_, pinc_, pmax_, d_, gain_, offset_: 0] Produce portrait of the output probability given threshold functions of specified gain. Offset=0: No tonic inhibition. >0, Floor[d/2] offset."
+Thrpout::usage="Thrpout[pmin_, pinc_, pmax_, d_, gain_, offset_: 0, level_:0.5] Produce portrait of the output probability given threshold functions of specified gain. Offset=0: No tonic inhibition. >0, Floor[d*level] offset."
+
+Thrsparse::usage="Thrsparse[pmin_, pinc_, pmax_, d_, gain_, offset_: 0, toniclevel_:0.5] As Thrpout but for sparsity measure out_sparseness/in_sparseness = (1-out_activity)/(1-in_activity)"
 
 PDesc::usage="PDesc[f_, TB_] Returns the population acitivty (i.e. probability that a cell in active) implied by frequency 'f' in time bin of TB seconds assuming \
 Poisson spike train."
@@ -516,9 +518,9 @@ Module[{intmems},
   		intmems = IntervalMemberQ[Table[Interval[{(x - 1)*1/(gain*d), If[x == d, 1, x*1/(gain*d)]}], {x, d}], pin]; 
         Thread[If[Thread[# > d], d, #]] &@(Last[Position[intmems, True]][[1]] + If[offset>0,Floor[(d+1)*toniclevel],1]-1)];
 (**************************************************************************************)
-Thrent[data_, pmin_, pinc_, pmax_, d_, gain_, offset_: 0] := 
+Thrent[data_, pmin_, pinc_, pmax_, d_, gain_, offset_: 0, toniclevel_: 0.5] := 
 Table[
-      data[[1]][[d]][[GThreshold[pin, d, gain, offset]]][[1]][[1]][[1 + Floor[(pin - pmin)/pinc]]], 
+      data[[1]][[d]][[GThreshold[pin, d, gain, offset, toniclevel]]][[1]][[1]][[1 + Floor[(pin - pmin)/pinc]]], 
      {pin, pmin, pmax, pinc}]
  (**************************************************************************************)
 Thrprune[data_,pmin_, pinc_, pmax_, dmax_, gain_] :=
@@ -530,7 +532,9 @@ Thrprune[data_,pmin_, pinc_, pmax_, dmax_, gain_] :=
         {\[Phi], d}],
    {d, dmax}]}
 (**************************************************************************************)
-Thrpout[pmin_, pinc_, pmax_, d_, gain_, offset_: 0] := Table[Pout[d, pin, GThreshold[pin, d, gain, offset]], {pin, pmin, pmax, pinc}]                                         
+Thrpout[pmin_, pinc_, pmax_, d_, gain_, offset_: 0, toniclevel_:0.5] := Table[Pout[d, pin, GThreshold[pin, d, gain, offset, toniclevel]], {pin, pmin, pmax, pinc}]                                         
+(**************************************************************************************)        
+Thrsparse[pmin_, pinc_, pmax_, d_, gain_, offset_: 0, toniclevel_:0.5] := Table[(1-Pout[d, pin, GThreshold[pin, d, gain, offset, toniclevel]])/(1-pin), {pin, pmin, pmax, pinc}]                                         
 (**************************************************************************************)        
 Loaddump[file_]:=
                       Flatten[
